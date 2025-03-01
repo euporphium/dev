@@ -6,7 +6,6 @@ dry="0"
 skip_packages="0"
 skip_config="0"
 
-export PACKAGE_DIR="$HOME/packages"
 
 while [[ $# > 0 ]]; do
 	if [[ $1 == "--dry" ]]; then
@@ -64,7 +63,15 @@ echo "🚀 Bootstrap starting from $script_dir with filter: '$filter'"
 
 if [[ "$skip_packages" != "1" ]]; then
 	log "📦 Installing Packages"
-	pkg_scripts=$(find "$script_dir/packages" -maxdepth 2 -mindepth 1 -type f -executable)
+	
+	export PACKAGE_DIR="$HOME/packages"
+
+	if [[ ! -d "$PACKAGE_DIR" ]]; then
+	    execute mkdir -p "$PACKAGE_DIR"
+	    log "📁 Created package directory: $PACKAGE_DIR"
+	fi
+
+	pkg_scripts=$(find "$script_dir/packages" -maxdepth 1 -mindepth 1 -type f -executable)
 	for pkg_script in $pkg_scripts; do
 		if [[ -n "$filter" ]] && echo "$pkg_script" | grep -qv "$filter"; then
 			log "🔍 Filtering out: $pkg_script"
@@ -74,7 +81,7 @@ if [[ "$skip_packages" != "1" ]]; then
 		execute "$pkg_script"
 	done
 else
-	echo "⏭️  Skipping Packages"
+	log "⏭️  Skipping Packages"
 fi
 
 if [[ "$skip_config" != "1" ]]; then
@@ -84,6 +91,8 @@ if [[ "$skip_config" != "1" ]]; then
 	if [[ ! -d "$XDG_CONFIG_HOME" ]]; then
 		execute mkdir -p "$XDG_CONFIG_HOME"
 	fi
+
+	copy_dir config/.config $XDG_CONFIG_HOME
 
 	copy_file config/.zsh_profile $HOME
 	copy_file config/.zshrc $HOME

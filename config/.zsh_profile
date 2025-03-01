@@ -18,5 +18,4 @@ addToPathFront() {
 
 #addToPathFront $HOME/.local/scripts
 
-## All that sweet sweet fzf
-#[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
