@@ -23,11 +23,6 @@ if [ -d "$NEOVIM_DIR" ]; then
 	rm -rf "$NEOVIM_DIR"
 fi
 
-# Install dependencies
-echo "📥 Installing build dependencies"
-sudo apt-get update
-sudo apt-get install -y ninja-build gettext cmake unzip curl build-essential
-
 # Clone the repository
 echo "🔄 Cloning Neovim repository..."
 git clone -b "$NEOVIM_VERSION" https://github.com/neovim/neovim.git "$NEOVIM_DIR"

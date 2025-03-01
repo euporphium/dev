@@ -6,7 +6,6 @@ dry="0"
 skip_packages="0"
 skip_config="0"
 
-
 while [[ $# > 0 ]]; do
 	if [[ $1 == "--dry" ]]; then
         	dry="1"
@@ -19,6 +18,12 @@ while [[ $# > 0 ]]; do
 	fi
 	shift
 done
+
+# Detect platform
+is_macos=0
+if [[ "$(uname)" == "Darwin" ]]; then
+    is_macos=1
+fi
 
 log() {
 	if [[ $dry == "1" ]]; then
@@ -41,7 +46,11 @@ copy_dir() {
 	to=$2
 
 	pushd $from > /dev/null
-	dirs=$(find . -mindepth 1 -maxdepth 1 -type d -printf "%f\n")
+	if [[ $is_macos == "1" ]]; then
+	    dirs=$(find . -depth 1 -type d | xargs -n 1 basename)
+	else
+	    dirs=$(find . -mindepth 1 -maxdepth 1 -type d -printf "%f\n")
+	fi
 	for dir in $dirs; do
 		execute rm -rf $to/$dir
 		execute cp -r $dir $to/$dir
@@ -65,13 +74,32 @@ if [[ "$skip_packages" != "1" ]]; then
 	log "📦 Installing Packages"
 	
 	export PACKAGE_DIR="$HOME/packages"
-
 	if [[ ! -d "$PACKAGE_DIR" ]]; then
 	    execute mkdir -p "$PACKAGE_DIR"
 	    log "📁 Created package directory: $PACKAGE_DIR"
 	fi
 
-	pkg_scripts=$(find "$script_dir/packages" -maxdepth 1 -mindepth 1 -type f -executable)
+	common_pkg_dir="$script_dir/packages/common"
+	if [[ $is_macos == "1" ]]; then
+	    platform_pkg_dir="$script_dir/packages/macos"
+	else
+	    platform_pkg_dir="$script_dir/packages/linux"
+	fi
+
+	if [[ $is_macos == "1" ]]; then
+	        common_scripts=$(find "$common_pkg_dir" -depth 1 -type f -perm +111)
+	        platform_scripts=$(find "$platform_pkg_dir" -depth 1 -type f -perm +111)
+	else
+	        common_scripts=$(find "$common_pkg_dir" -mindepth 1 -maxdepth 1 -type f -executable)
+	        platform_scripts=$(find "$platform_pkg_dir" -mindepth 1 -maxdepth 1 -type f -executable)
+	fi
+
+	#pkg_scripts=$({ echo "$common_scripts"; echo "$platform_scripts"; } | grep -v "^$" | sort)
+	pkg_scripts=$({
+		for script in $common_scripts $platform_scripts; do
+			echo "$(basename "$script") $script"
+		done
+	} | sort | awk '{print $2}')
 	for pkg_script in $pkg_scripts; do
 		if [[ -n "$filter" ]] && echo "$pkg_script" | grep -qv "$filter"; then
 			log "🔍 Filtering out: $pkg_script"
