@@ -12,13 +12,17 @@ get_latest_version() {
 	curl -s https://api.github.com/repos/junegunn/fzf/releases/latest | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4 | sed 's/^v//'
 }
 
-current=$(get_current_version)
+if command -v fzf &> /dev/null; then
+	current=$(get_current_version)
+else
+	current=""
+fi
 latest=$(get_latest_version)
 
 if [ -z "$current" ] || [ "$current" != "$latest" ]; then
 	cd $PACKAGE_DIR/fzf
 	git pull
-	echo n | ./install --completion zsh --key-bindings zsh
+	echo n | ./install --completion --key-bindings --no-bash --no-fish
 else
 	echo "✅ fzf is already up to date. Skipping."
 fi
