@@ -93,6 +93,7 @@ if [[ "$skip_config" != "1" ]]; then
 	fi
 
 	copy_dir config/.config $XDG_CONFIG_HOME
+	copy_dir config/.local $HOME/.local
 
 	copy_file config/.zsh_profile $HOME
 	copy_file config/.zshrc $HOME

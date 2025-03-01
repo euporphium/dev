@@ -16,6 +16,6 @@ addToPathFront() {
         fi
 }
 
-#addToPathFront $HOME/.local/scripts
+addToPath $HOME/.local/scripts
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
