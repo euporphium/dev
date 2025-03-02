@@ -16,7 +16,7 @@ copy_to_clipboard() {
 		xclip -selection clipboard
 	else
 		cat
-		echo "Note: Clipboard copy not available, Install pbcopy"
+		echo "Note: Clipboard copy not available, Install pbcopy or xclip"
 		return 1
 	fi
 
