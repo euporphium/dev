@@ -13,17 +13,16 @@ get_latest_version() {
 }
 
 if command -v fzf &> /dev/null; then
-    current=$(get_current_version)
+	current=$(get_current_version)
 else
-    current=""
+	current=""
 fi
-
 latest=$(get_latest_version)
 
 if [ -z "$current" ] || [ "$current" != "$latest" ]; then
-    cd $PACKAGE_DIR/fzf
-    git pull
-    echo n | ./install --completion --key-bindings --no-bash --no-fish
+	cd $PACKAGE_DIR/fzf
+	git pull
+	echo n | ./install --completion --key-bindings --no-bash --no-fish
 else
-    echo "✅ fzf is already up to date. Skipping."
+	echo "✅ fzf is already up to date. Skipping."
 fi
