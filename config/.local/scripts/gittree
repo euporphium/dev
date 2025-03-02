@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+# Store current directory and find git root
+current_dir=$(pwd)
+git_root=$(git rev-parse --show-toplevel 2>/dev/null)
+
+if [ -z "$git_root" ]; then
+	echo "Error: Not inside a git repository"
+	exit 1
+fi
+
+copy_to_clipboard() {
+	if command -v pbcopy > /dev/null; then
+		pbcopy
+	elif command -v xclip > /dev/null; then
+		xclip -selection clipboard
+	else
+		cat
+		echo "Note: Clipboard copy not available, Install pbcopy or xclip"
+		return 1
+	fi
+
+	echo "Copied to clipboard!"
+	return 0
+}
+
+if [ "$1" = "content" ]; then
+        # Change to git root to use relative paths
+        cd "$git_root"
+	rel_path="${current_dir#$git_root/}"
+	if [ "$rel_path" = "$current_dir" ]; then
+		rel_path="."
+	fi
+        
+        # Create temporary file
+        temp_file=$(mktemp)
+
+        # Get only files under current directory
+        git ls-files "$rel_path/" | while read -r file; do
+		if [ -f "$file" ]; then  # Check if file exists
+                	echo "// Path: $file" >> "$temp_file"
+                	echo >> "$temp_file"
+                	cat "$file" >> "$temp_file"
+                	echo >> "$temp_file"
+                	echo >> "$temp_file"
+		fi
+        done
+
+        # Output and copy to clipboard
+        cat "$temp_file" | tee >(copy_to_clipboard)
+        rm "$temp_file"
+        
+        # Return to original directory
+        cd "$current_dir"
+        echo "File contents copied to clipboard!"
+else
+	# Original tree functionality
+        output=$(git ls-files | tree --fromfile)
+        echo "$output"
+        echo "$output" | copy_to_clipboard
+        echo "Tree structure copied to clipboard!"
+fi
