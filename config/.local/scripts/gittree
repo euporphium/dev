@@ -12,11 +12,15 @@ fi
 copy_to_clipboard() {
 	if command -v pbcopy > /dev/null; then
 		pbcopy
+	elif command -v xclip > /dev/null; then
+		xclip -selection clipboard
 	else
 		cat
 		echo "Note: Clipboard copy not available, Install pbcopy"
 		return 1
 	fi
+
+	echo "Copied to clipboard!"
 	return 0
 }
 
