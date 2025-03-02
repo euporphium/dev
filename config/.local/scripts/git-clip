@@ -12,15 +12,16 @@ fi
 copy_to_clipboard() {
 	if command -v pbcopy > /dev/null; then
 		pbcopy
-	elif command -v xclip > /dev/null; then
-		xclip -selection clipboard
+		echo "Copied to clipboard!"
+	elif command -v tmux > /dev/null; then
+		tmux load-buffer -b git-clip-buffer -
+		echo "Copied to tmux buffer!"
 	else
 		cat
-		echo "Note: Clipboard copy not available, Install pbcopy or xclip"
+		echo "Note: Clipboard copy not available"
 		return 1
 	fi
 
-	echo "Copied to clipboard!"
 	return 0
 }
 
