@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+selected=$(find $(pwd) -mindepth 1 -maxdepth 1 -type d | fzf)
+if [[ -z "$selected" ]]; then
+	exit 0
+fi
+
+selected_name=$(basename $selected | tr ":,. " "____")
+
+tmux_silent() {
+    tmux "$@" 2>/dev/null
+}
+
+switch_to() {
+	if [[ -z "$TMUX" ]]; then
+		tmux_silent attach-session -t $selected_name
+	else
+		tmux_silent switch-client -t $selected_name
+	fi
+}
+
+if tmux_silent has-session -t=$selected_name; then
+	switch_to
+	exit 0
+fi
+
+tmux_silent new-session -ds $selected_name -c $selected
+switch_to
+tmux_silent send-keys -t $selected_name "ready-tmux" ^M
