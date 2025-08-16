@@ -2,6 +2,10 @@ export TERM=xterm-256color
 export XDG_CONFIG_HOME=$HOME/.config
 export GIT_EDITOR="nvim"
 
+# (Custom) Same as theme but includes hostname
+PROMPT='%{$fg_bold[magenta]%}%m%{$reset_color%} %(?:%{$fg_bold[green]%}%1{➜%} :%{$fg_bold[red]%}%1{➜%} )%{$fg[cyan]%}%c%{$reset_color%}'
+PROMPT+=' $(git_prompt_info)'
+
 alias vim="nvim"
 
 addToPath() {
